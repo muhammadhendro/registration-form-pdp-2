@@ -1,0 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Roboto', sans-serif;
+  --color-xynexis-bg: #20242F;
+  --color-xynexis-card: #2B303E;
+  --color-ignite-green: #90c343;
+  --color-ignite-green-hover: #7aab37;
+  --color-ignite-gray: #f8f8f8;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+:root {
+  --background: #20242F;
+  --foreground: #FFFFFF;
+}
+
+html,
+body {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  background-color: var(--background) !important;
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Animations */
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.shimmer {
+  background: linear-gradient(90deg,
+      rgba(144, 195, 67, 0) 0%,
+      rgba(144, 195, 67, 0.05) 50%,
+      rgba(144, 195, 67, 0) 100%);
+  background-size: 1000px 100%;
+  animation: shimmer 3s infinite;
+}
