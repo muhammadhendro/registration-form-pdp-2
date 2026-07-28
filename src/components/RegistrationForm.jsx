@@ -1,26 +1,16 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-const InputField = ({ label, name, type = 'text', required = false, value, onChange, isFocused, onFocus, onBlur }) => (
-    <div className="w-full group">
-        <label className={`block text-sm font-semibold mb-2 transition-colors duration-200 ${isFocused ? 'text-ignite-green' : 'text-gray-300'}`}>
-            {label} {required && <span className="text-ignite-green">*</span>}
-        </label>
-        <input
-            type={type}
-            name={name}
-            value={value}
-            onChange={onChange}
-            onFocus={onFocus}
-            onBlur={onBlur}
-            className="w-full px-4 py-3.5 rounded-lg bg-[#2B303E] border border-gray-600 text-white placeholder-gray-400 
-                 focus:outline-none focus:border-ignite-green focus:ring-2 focus:ring-ignite-green/20 
-                 transition-all duration-300 hover:border-gray-500 shadow-sm"
-            required={required}
-        />
-    </div>
-);
+const fieldClassName = `
+    w-full rounded-2xl border border-[#d7dde5] bg-white px-4 py-3.5 text-[15px] text-[#20242F]
+    shadow-[0_10px_30px_rgba(32,36,47,0.06)] transition-all duration-300
+    placeholder:text-[#8A909B] hover:border-[#c2ccd8]
+    focus:border-[#90C343] focus:outline-none focus:ring-4 focus:ring-[#90C343]/15
+`;
+
+const sectionHeadingClassName =
+    'text-sm font-semibold uppercase tracking-[0.22em] text-[#90C343]';
 
 const trainingDetails = [
     {
@@ -36,6 +26,50 @@ const trainingDetails = [
         value: 'PT Bridgestone Tire Indonesia'
     }
 ];
+
+const InputField = ({
+    label,
+    name,
+    type = 'text',
+    required = false,
+    value,
+    onChange,
+    isFocused,
+    onFocus,
+    onBlur
+}) => (
+    <div className="w-full">
+        <label
+            className={`mb-2 block text-sm font-semibold transition-colors duration-200 ${
+                isFocused ? 'text-[#90C343]' : 'text-[#20242F]'
+            }`}
+        >
+            {label} {required && <span className="text-[#BE45FF]">*</span>}
+        </label>
+        <input
+            type={type}
+            name={name}
+            value={value}
+            onChange={onChange}
+            onFocus={onFocus}
+            onBlur={onBlur}
+            className={fieldClassName}
+            required={required}
+        />
+    </div>
+);
+
+const SectionHeader = ({ title, description }) => (
+    <div className="flex items-start gap-4">
+        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#90C343]/12 shadow-inner shadow-[#90C343]/10">
+            <span className="h-3 w-3 rounded-full bg-gradient-to-r from-[#BE45FF] to-[#E9BC1E]" />
+        </div>
+        <div>
+            <p className={sectionHeadingClassName}>{title}</p>
+            {description ? <p className="text-sm leading-6 text-[#667085]">{description}</p> : null}
+        </div>
+    </div>
+);
 
 export default function RegistrationForm() {
     const [formData, setFormData] = useState({
@@ -53,6 +87,7 @@ export default function RegistrationForm() {
     const [isSubmitted, setIsSubmitted] = useState(false);
 
     const wrapperRef = useRef(null);
+
     useEffect(() => {
         const sendHeight = () => {
             if (wrapperRef.current) {
@@ -85,7 +120,7 @@ export default function RegistrationForm() {
                         'Content-Type': 'application/json'
                     }
                 });
-                
+
                 if (response.ok) {
                     const data = await response.json();
                     setCsrfToken(data.token);
@@ -96,13 +131,13 @@ export default function RegistrationForm() {
                 console.error('Error fetching token:', error);
             }
         };
-        
+
         fetchToken();
     }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
             [name]: value
         }));
@@ -111,7 +146,7 @@ export default function RegistrationForm() {
     const validateForm = () => {
         const errors = {};
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const nameRegex = /^[a-zA-Z\s\.\-\']+$/;
+        const nameRegex = /^[a-zA-Z\s.\-']+$/;
 
         if (!formData.full_name) {
             errors.full_name = 'Nama Peserta wajib diisi';
@@ -144,7 +179,7 @@ export default function RegistrationForm() {
         setMessage(null);
 
         if (!csrfToken) {
-            setMessage({ type: 'error', text: 'Security token not ready. Please refresh the page.' });
+            setMessage({ type: 'error', text: 'Token keamanan belum siap. Silakan muat ulang halaman.' });
             setLoading(false);
             return;
         }
@@ -175,13 +210,13 @@ export default function RegistrationForm() {
 
             if (!response.ok) {
                 if (response.status === 429) {
-                    throw new Error(result.error || 'Please wait before submitting again.');
+                    throw new Error(result.error || 'Mohon tunggu sebentar sebelum mengirim ulang.');
                 }
-                throw new Error(result.error || 'Submission failed');
+                throw new Error(result.error || 'Pengiriman formulir gagal.');
             }
 
             setIsSubmitted(true);
-            setMessage({ type: 'success', text: '✨ Thank you! Your registration has been submitted successfully.' });
+            setMessage({ type: 'success', text: 'Terima kasih! Registrasi Anda berhasil dikirim.' });
             setFormData({
                 full_name: '',
                 company_name: '',
@@ -192,18 +227,18 @@ export default function RegistrationForm() {
 
             const tokenResponse = await fetch('/api/get-registration-token', {
                 method: 'GET',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json'
                 }
             });
+
             if (tokenResponse.ok) {
                 const tokenData = await tokenResponse.json();
                 setCsrfToken(tokenData.token);
             }
-
         } catch (error) {
             console.error('Error submitting form:', error);
-            setMessage({ type: 'error', text: error.message || 'Something went wrong. Please try again.' });
+            setMessage({ type: 'error', text: error.message || 'Terjadi kendala. Silakan coba lagi.' });
         } finally {
             setLoading(false);
         }
@@ -211,22 +246,24 @@ export default function RegistrationForm() {
 
     if (isSubmitted) {
         return (
-            <div className="w-full h-full bg-[#20242F] text-white p-4 pt-24 md:p-8 md:pt-32 flex items-start justify-center">
-                <div ref={wrapperRef} className="max-w-4xl w-full">
-                    <div className="bg-[#20242F] rounded-2xl shadow-2xl p-8 md:p-12 text-center border border-gray-700 animate-[fadeInUp_0.5s_ease-out]">
-                        <div className="mb-6">
-                            <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-ignite-green/20 mb-6">
-                                <svg className="h-10 w-10 text-ignite-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
-                            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
-                                Selesai / Terima Kasih!
-                            </h2>
-                            <p className="text-gray-300 text-lg md:text-xl leading-relaxed">
-                                Form pendaftaran Anda berhasil terkirim.
-                            </p>
+            <div
+                className="w-full bg-gradient-to-b from-white via-[#FAFBFC] to-[#F1F4F8] px-4 py-6 text-[#20242F] md:px-8 md:py-10"
+                style={{ fontFamily: 'Roboto, Arial, sans-serif' }}
+            >
+                <div ref={wrapperRef} className="mx-auto max-w-4xl">
+                    <div className="relative overflow-hidden rounded-[28px] border border-[#E4E7EC] bg-white px-6 py-10 text-center shadow-[0_24px_80px_rgba(32,36,47,0.08)] md:px-12 md:py-14">
+                        <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#BE45FF] via-[#E9BC1E] to-[#90C343]" />
+                        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[#90C343]/12 shadow-inner shadow-[#90C343]/10">
+                            <svg className="h-10 w-10 text-[#90C343]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                            </svg>
                         </div>
+                        <h2 className="text-3xl font-bold tracking-[-0.02em] text-[#20242F] md:text-4xl">
+                            Selesai / Terima Kasih!
+                        </h2>
+                        <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-[#667085] md:text-lg">
+                            Form registrasi Anda berhasil terkirim dan sudah tercatat sebagai data baru.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -234,62 +271,80 @@ export default function RegistrationForm() {
     }
 
     return (
-        <div className="w-full h-full bg-[#20242F] text-white p-4 pt-24 md:p-8 md:pt-32 flex items-start justify-center">
-            <div ref={wrapperRef} className="max-w-4xl w-full">
-                {/* Decorative Elements */}
-                <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-                    <div className="absolute top-20 left-10 w-72 h-72 bg-ignite-green/5 rounded-full blur-3xl"></div>
-                    <div className="absolute bottom-20 right-10 w-96 h-96 bg-ignite-green/5 rounded-full blur-3xl"></div>
-                </div>
+        <div
+            className="w-full bg-gradient-to-b from-white via-[#FAFBFC] to-[#F1F4F8] px-4 py-6 text-[#20242F] md:px-8 md:py-10"
+            style={{ fontFamily: 'Roboto, Arial, sans-serif' }}
+        >
+            <div ref={wrapperRef} className="mx-auto max-w-5xl">
+                <div className="relative overflow-hidden rounded-[28px] border border-[#E4E7EC] bg-white px-4 pb-6 pt-5 shadow-[0_24px_80px_rgba(32,36,47,0.08)] sm:px-6 md:px-12 md:pb-12 md:pt-8">
+                    <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#BE45FF] via-[#E9BC1E] to-[#90C343]" />
+                    <div className="pointer-events-none absolute -left-12 top-20 h-44 w-44 rounded-full bg-[#BE45FF]/10 blur-3xl" />
+                    <div className="pointer-events-none absolute -right-12 bottom-16 h-48 w-48 rounded-full bg-[#E9BC1E]/14 blur-3xl" />
 
-                <div className="relative bg-[#20242F]/80 backdrop-blur-sm px-4 pb-6 pt-4 md:px-12 md:pb-12 md:pt-6 md:rounded-2xl md:shadow-2xl md:border border-gray-700 animate-fade-in-up">
-                    {/* Header */}
-                    <div className="text-center mb-6 pb-4 border-b border-gray-600/50">
-                        <h1 className="mx-auto max-w-2xl text-[2rem] leading-tight md:text-4xl font-bold text-white mb-3 tracking-tight">
+                    <div className="relative border-b border-[#EAECF0] pb-8">
+                        <p className={sectionHeadingClassName}>IGNITE Training Form</p>
+                        <h1 className="mt-3 max-w-3xl text-[2rem] font-bold leading-tight tracking-[-0.03em] text-[#20242F] md:text-[2.7rem]">
                             Form Registrasi Training
                         </h1>
-                        <div className="mt-5 rounded-2xl border border-gray-600/50 bg-[#2B303E]/50 p-4 sm:p-5">
-                            <div className="space-y-4 text-left">
+                        <p className="mt-3 max-w-3xl text-sm leading-7 text-[#667085] md:text-base">
+                            Isi data peserta berikut untuk pencatatan kehadiran training dan kebutuhan administrasi.
+                        </p>
+
+                        <div className="mt-6 rounded-[24px] border border-[#EAECF0] bg-[linear-gradient(180deg,#FFFFFF_0%,#F7F8FA_100%)] p-5 sm:p-6">
+                            <div className="grid gap-4 text-left">
                                 {trainingDetails.map(({ label, value }) => (
-                                    <div key={label} className="flex flex-col gap-1.5 sm:grid sm:grid-cols-[8.5rem_1rem_minmax(0,1fr)] sm:gap-x-3">
-                                        <span className="text-sm font-semibold text-white sm:text-base">{label}</span>
-                                        <span className="hidden text-gray-400 sm:block">:</span>
-                                        <p className="text-sm leading-6 text-gray-300 sm:text-base sm:leading-7">{value}</p>
+                                    <div
+                                        key={label}
+                                        className="flex flex-col gap-1.5 sm:grid sm:grid-cols-[8.5rem_1rem_minmax(0,1fr)] sm:gap-x-3"
+                                    >
+                                        <span className="text-sm font-semibold text-[#20242F] sm:text-base">{label}</span>
+                                        <span className="hidden text-[#98A2B3] sm:block">:</span>
+                                        <p className="text-sm leading-6 text-[#667085] sm:text-base sm:leading-7">{value}</p>
                                     </div>
                                 ))}
                             </div>
                         </div>
                     </div>
 
-                    {/* Message Alert */}
                     {message && (
-                        <div className={`p-5 mb-8 rounded-xl border flex items-center gap-3 animate-fade-in-up ${message.type === 'success'
-                            ? 'bg-ignite-green/10 border-ignite-green/30 text-ignite-green'
-                            : 'bg-red-500/10 border-red-500/30 text-red-500'
-                            }`}>
+                        <div
+                            className={`relative mt-8 flex items-center gap-3 rounded-2xl border px-5 py-4 ${
+                                message.type === 'success'
+                                    ? 'border-[#B7E08A] bg-[#F4FBE9] text-[#5B8C17]'
+                                    : 'border-[#F2B8B5] bg-[#FFF1F0] text-[#C5322A]'
+                            }`}
+                        >
                             {message.type === 'success' ? (
-                                <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                <svg className="h-6 w-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
                                 </svg>
                             ) : (
-                                <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                <svg className="h-6 w-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
                                 </svg>
                             )}
                             <span className="font-medium">{message.text}</span>
                         </div>
                     )}
 
-                    {/* Form */}
-                    <form onSubmit={handleSubmit} className="space-y-8">
-                        {/* Personal Information Section */}
-                        <div className="space-y-6">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="w-1 h-8 bg-gradient-to-b from-ignite-green to-ignite-green/50 rounded-full"></div>
-                                <h2 className="text-xl font-bold text-white">Data Peserta</h2>
-                            </div>
+                    <form onSubmit={handleSubmit} className="relative mt-8 space-y-10">
+                        <section className="space-y-6">
+                            <SectionHeader
+                                title="Data Peserta"
+                                description="Mohon isi data berikut dengan lengkap agar registrasi Anda dapat diproses."
+                            />
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                                 <InputField
                                     label="1. Nama Peserta (nama lengkap)"
                                     name="full_name"
@@ -341,37 +396,42 @@ export default function RegistrationForm() {
                                     onBlur={() => setFocusedField(null)}
                                 />
                             </div>
-                        </div>
+                        </section>
 
-                        <div className="rounded-xl border border-[#BE45FF]/30 bg-[#BE45FF]/10 px-5 py-4 text-sm text-gray-200">
-                            <p className="font-semibold text-white">Catatan:</p>
-                            <p className="mt-2 leading-relaxed">
-                                &ldquo;Dengan mengisi Absensi ini, Anda menyetujui PT Pijar Edukasi Teknologi (Xynexis Group) akan memproses data pribadi Anda untuk keperluan pencatatan kehadiran dan kebutuhan administrasi&rdquo;
+                        <div className="rounded-[24px] border border-[#E8D9FA] bg-[linear-gradient(135deg,rgba(190,69,255,0.08)_0%,rgba(233,188,30,0.08)_100%)] px-5 py-5 text-sm text-[#4D5761]">
+                            <p className="font-semibold uppercase tracking-[0.18em] text-[#7B3FB3]">Catatan</p>
+                            <p className="mt-3 leading-7">
+                                &ldquo;Dengan mengisi Absensi ini, Anda menyetujui PT Pijar Edukasi Teknologi
+                                (Xynexis Group) akan memproses data pribadi Anda untuk keperluan pencatatan
+                                kehadiran dan kebutuhan administrasi&rdquo;
                             </p>
                         </div>
 
-                        {/* Submit Button */}
                         <button
                             type="submit"
                             disabled={loading}
-                            className={`w-full py-4 rounded-xl font-bold text-lg text-white transition-all duration-300 transform 
-                         shadow-lg hover:shadow-[#BE45FF]/20 ${loading
-                                    ? 'bg-gray-600 cursor-not-allowed opacity-75'
-                                    : 'bg-gradient-to-r from-[#BE45FF] to-[#E9BC1E] hover:scale-[1.02] active:scale-[0.98]'
-                                } mb-6`}
+                            className={`w-full rounded-2xl px-6 py-4 text-lg font-bold text-white transition-all duration-300 ${
+                                loading
+                                    ? 'cursor-not-allowed bg-[#98A2B3] opacity-80'
+                                    : 'bg-gradient-to-r from-[#BE45FF] via-[#CF6EAF] to-[#E9BC1E] shadow-[0_18px_40px_rgba(190,69,255,0.22)] hover:-translate-y-0.5 hover:shadow-[0_22px_48px_rgba(190,69,255,0.28)] active:translate-y-0'
+                            }`}
                         >
                             {loading ? (
                                 <span className="flex items-center justify-center gap-3">
-                                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    <svg className="h-5 w-5 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                        <path
+                                            className="opacity-75"
+                                            fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                        />
                                     </svg>
-                                    Processing...
+                                    Memproses...
                                 </span>
                             ) : (
                                 <span className="flex items-center justify-center gap-2">
                                     Kirim Registrasi
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                     </svg>
                                 </span>
